@@ -1,0 +1,16 @@
+/*
+ * github issue #232: missing asterisk for derived attribute / data lost
+ */
+ISO-10303-21;
+HEADER;
+FILE_DESCRIPTION((''),'2;1');
+FILE_NAME('', '', (''), (''), '', '', '');
+FILE_SCHEMA(('multiple_inheritance_derived'));
+ENDSEC;
+DATA;
+
+#1=AB(*);       /* should be invalid */
+#2=AB(.BEE.);   /* should be valid */
+
+ENDSEC;
+END-ISO-10303-21;
