@@ -1646,12 +1646,12 @@ void LIBstructor_print( Entity entity, FILE * file, Schema schema ) {
 
     attr_list = ENTITYget_all_attributes( entity );
 
-    LISTdo( attr_list, a, Variable )
-    if( VARis_derived( a ) ) {
-        fprintf( file, "    MakeDerived (\"%s\");\n",
-                 VARget_simple_name( a ) );
-    }
-    LISTod;
+    LISTdo( attr_list, a, Variable ) {
+        if( VARis_derived( a ) ) {
+            fprintf( file, "    MakeDerived( \"%s\", \"%s\" );\n",
+                    VARget_simple_name( a ), a->type->superscope->symbol.name );
+        }
+    } LISTod;
     fprintf( file, "}\n" );
 
     /*  copy constructor  */
@@ -1864,12 +1864,12 @@ void LIBstructor_print_w_args( Entity entity, FILE * file, Schema schema ) {
 
         attr_list = ENTITYget_all_attributes( entity );
 
-        LISTdo( attr_list, a, Variable )
-        if( VARis_derived( a ) ) {
-            fprintf( file, "    MakeDerived (\"%s\");\n",
-                     VARget_simple_name( a ) );
-        }
-        LISTod;
+        LISTdo( attr_list, a, Variable ) {
+            if( VARis_derived( a ) ) {
+                fprintf( file, "    MakeDerived( \"%s\", \"%s\" );\n",
+                        VARget_simple_name( a ), a->type->superscope->symbol.name );
+            }
+        } LISTod;
         fprintf( file, "}\n" );
     } /* end if(multiple_inheritance) */
 
