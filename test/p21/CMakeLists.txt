@@ -61,6 +61,30 @@ set_tests_properties( test_select_segfault PROPERTIES DEPENDS build_cpp_sdai_sel
 
 #multiple inheritance where two attrs with same name are inherited; one is derived
 BUILD_A_SCHEMA(${SC_SOURCE_DIR}/test/unitary_schemas/multiple_inheritance_derived.exp)
-add_test( test_multiple_inheritance_derived ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/p21read_sdai_multiple_inheritance_derived
-                               ${CMAKE_CURRENT_SOURCE_DIR}/multiple_inheritance_derived.stp )
-set_tests_properties( test_multiple_inheritance_derived PROPERTIES DEPENDS build_cpp_sdai_multiple_inheritance_derived LABELS exchange_file )
+set( MI_DERIVED_HEAD "
+ISO-10303-21;
+HEADER;
+FILE_DESCRIPTION((''),'2;1');
+FILE_NAME('', '', (''), (''), '', '', '');
+FILE_SCHEMA(('multiple_inheritance_derived'));
+ENDSEC;
+DATA;
+")
+set( MI_DERIVED_TAIL "
+ENDSEC;
+END-ISO-10303-21;
+" )
+#nr is appended to the test name; instance is a p21 instance; fail is the value of the WILL_FAIL test property
+FUNCTION( MI_DERIVED_TEST nr instance fail )
+  set( test_file "${CMAKE_CURRENT_BINARY_DIR}/multiple_inheritance_derived_${nr}.stp" )
+  file( WRITE ${test_file} "${MI_DERIVED_HEAD}${instance}${MI_DERIVED_TAIL}" )
+  add_test( test_multiple_inheritance_derived_${nr} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/p21read_sdai_multiple_inheritance_derived ${test_file} )
+  set_tests_properties( test_multiple_inheritance_derived_${nr} PROPERTIES DEPENDS build_cpp_sdai_multiple_inheritance_derived LABELS exchange_file WILL_FAIL ${fail} )
+ENDFUNCTION( MI_DERIVED_TEST nr instance fail )
+
+MI_DERIVED_TEST( 1 "#1=AB(*);      /* should be invalid */" TRUE )
+MI_DERIVED_TEST( 2 "#2=AB(.BEE.);  /* should be  valid  */" FALSE )
+MI_DERIVED_TEST( 3 "#3=A(*);       /* should be invalid */" TRUE )
+MI_DERIVED_TEST( 4 "#4=B(.BEE.);   /* should be  valid  */" FALSE )
+MI_DERIVED_TEST( 5 "#5=A();        /* should be  valid  */" FALSE )
+MI_DERIVED_TEST( 6 "#6=B();        /* should be invalid */" TRUE )
