@@ -1648,8 +1648,14 @@ void LIBstructor_print( Entity entity, FILE * file, Schema schema ) {
 
     LISTdo( attr_list, a, Variable ) {
         if( VARis_derived( a ) ) {
+            const char * attr_entity;
+            if( a->type->superscope ) {
+                attr_entity = a->type->superscope->symbol.name;
+            } else { //derived attr is declared in the current entity
+                attr_entity = entity->symbol.name;
+            }
             fprintf( file, "    MakeDerived( \"%s\", \"%s\" );\n",
-                    VARget_simple_name( a ), a->type->superscope->symbol.name );
+                    VARget_simple_name( a ), attr_entity );
         }
     } LISTod;
     fprintf( file, "}\n" );
@@ -1866,8 +1872,14 @@ void LIBstructor_print_w_args( Entity entity, FILE * file, Schema schema ) {
 
         LISTdo( attr_list, a, Variable ) {
             if( VARis_derived( a ) ) {
+                const char * attr_entity;
+                if( a->type->superscope ) {
+                    attr_entity = a->type->superscope->symbol.name;
+                } else { //derived attr is declared in the current entity
+                    attr_entity = entity->symbol.name;
+                }
                 fprintf( file, "    MakeDerived( \"%s\", \"%s\" );\n",
-                        VARget_simple_name( a ), a->type->superscope->symbol.name );
+                        VARget_simple_name( a ), attr_entity );
             }
         } LISTod;
         fprintf( file, "}\n" );
