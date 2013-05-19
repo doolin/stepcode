@@ -17,22 +17,29 @@ ENDSEC;
 END-ISO-10303-21;
 " )
 
-# used in SINGLE_INSTANCE_TEST
+# used in INSTANCE_TEST
 set( SI_TEST_COUNTER 0 )
 
-#MACRO SINGLE_INSTANCE_TEST - create a file with a single instance and test with p21read
+#MACRO INSTANCE_TEST - create a file with one or more instances and test with p21read
 #sname is the schema name
 #instance is a p21 instance, without the number
-#will_fail is the value of the WILL_FAIL test property
-MACRO( SINGLE_INSTANCE_TEST sname will_fail instance )
+#test_mode is PASS or FAIL - whether the test should pass or fail. affects the WILL_FAIL property
+MACRO( INSTANCE_TEST sname test_mode instance )
+  if( ${test_mode} STREQUAL "PASS" )
+    set( _fail "FALSE" )
+  elseif( ${test_mode} STREQUAL "FAIL" )
+    set( _fail "TRUE" )
+  else( )
+    message( FATAL_ERROR "** Invalid test_mode in INSTANCE_TEST macro: ${test_mode} **" )
+  endif( ${test_mode} STREQUAL "PASS" )
   math( EXPR SI_TEST_COUNTER "${SI_TEST_COUNTER}+1" )
   set( test_file "${CMAKE_CURRENT_BINARY_DIR}/${sname}_${SI_TEST_COUNTER}.stp" )
   file( WRITE ${test_file} "${P21_FILE_HEAD}${sname}${P21_FILE_MID}
-  #${SI_TEST_COUNTER}=${instance}    /* should be invalid? ${will_fail} */
+  #${SI_TEST_COUNTER}=${instance}    /* should ${test_mode} */
   ${P21_FILE_TAIL}" )
   add_test( test_${sname}_${SI_TEST_COUNTER} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/p21read_sdai_${sname} ${test_file} )
-  set_tests_properties( test_${sname}_${SI_TEST_COUNTER} PROPERTIES DEPENDS build_cpp_sdai_${sname} LABELS exchange_file WILL_FAIL ${will_fail} )
-ENDMACRO( SINGLE_INSTANCE_TEST sname will_fail instance )
+  set_tests_properties( test_${sname}_${SI_TEST_COUNTER} PROPERTIES DEPENDS build_cpp_sdai_${sname} LABELS exchange_file WILL_FAIL ${_fail} )
+ENDMACRO( INSTANCE_TEST sname test_mode instance )
 
 
 # test schema names
@@ -87,23 +94,24 @@ set( mid "multiple_inheritance_derived" )
 BUILD_A_SCHEMA(${SC_SOURCE_DIR}/test/unitary_schemas/${mid}.exp)
 
 # FALSE --> should pass
-SINGLE_INSTANCE_TEST( ${mid} FALSE "A();"                 )
-SINGLE_INSTANCE_TEST( ${mid} TRUE  "A(*);"                )
-SINGLE_INSTANCE_TEST( ${mid} FALSE "B(.BEE.);"            )
-SINGLE_INSTANCE_TEST( ${mid} TRUE  "B();"                 )
-SINGLE_INSTANCE_TEST( ${mid} FALSE "AB(.BEE.);"           )
-SINGLE_INSTANCE_TEST( ${mid} TRUE  "AB(*);"               )
-SINGLE_INSTANCE_TEST( ${mid} FALSE "BA(.B.);"             )
-SINGLE_INSTANCE_TEST( ${mid} TRUE  "BA(*);"               )
-SINGLE_INSTANCE_TEST( ${mid} FALSE "AC();"                )
-SINGLE_INSTANCE_TEST( ${mid} TRUE  "AC(3.0);"             )
-SINGLE_INSTANCE_TEST( ${mid} TRUE  "AC('ac');"            )
-SINGLE_INSTANCE_TEST( ${mid} FALSE "DD(*);"               )
-SINGLE_INSTANCE_TEST( ${mid} TRUE  "DD();"                )
-SINGLE_INSTANCE_TEST( ${mid} TRUE  "DD(3);"               )
-SINGLE_INSTANCE_TEST( ${mid} FALSE "AABB(.BEE.,4,4.5);"   )
-SINGLE_INSTANCE_TEST( ${mid} TRUE  "AABB(4,4.5);"         )
-SINGLE_INSTANCE_TEST( ${mid} TRUE  "AABB(4,.BEE.,4.5);"   )
-SINGLE_INSTANCE_TEST( ${mid} TRUE  "AABB();"              )
-SINGLE_INSTANCE_TEST( ${mid} TRUE  "AABB('z',2,.B.,1.2);" )
+INSTANCE_TEST( ${mid} PASS "A();"                 )
+INSTANCE_TEST( ${mid} FAIL "A(*);"                )
+INSTANCE_TEST( ${mid} PASS "B(.BEE.);"            )
+INSTANCE_TEST( ${mid} FAIL "B();"                 )
+INSTANCE_TEST( ${mid} PASS "AB(.BEE.);"           )
+INSTANCE_TEST( ${mid} FAIL "AB(*);"               )
+INSTANCE_TEST( ${mid} PASS "BA(.B.);"             )
+INSTANCE_TEST( ${mid} FAIL "BA(*);"               )
+INSTANCE_TEST( ${mid} PASS "AC();"                )
+INSTANCE_TEST( ${mid} FAIL "AC(3.0);"             )
+INSTANCE_TEST( ${mid} FAIL "AC('ac');"            )
+INSTANCE_TEST( ${mid} PASS "DD(*);"               )
+INSTANCE_TEST( ${mid} FAIL "DD();"                )
+INSTANCE_TEST( ${mid} FAIL "DD(3);"               )
+INSTANCE_TEST( ${mid} PASS "(A(*)B(.BEE.)AA(4)BB(4.5)AABB());" )
+INSTANCE_TEST( ${mid} FAIL "AABB(.BEE.,4,4.5);"   )
+INSTANCE_TEST( ${mid} FAIL "AABB(4,4.5);"         )
+INSTANCE_TEST( ${mid} FAIL "AABB(4,.BEE.,4.5);"   )
+INSTANCE_TEST( ${mid} FAIL "AABB();"              )
+INSTANCE_TEST( ${mid} FAIL "AABB('z',2,.B.,1.2);" )
 
