@@ -37,9 +37,9 @@ void print_attrs( Express model ) {
         e = DICTlookup( s->symbol_table, entityName );
         if( e ) {
             printf( "    Entity %s\n", e->symbol.name );
-            attrs = ENTITYget_all_attributes( e );
+            attrs = ENTITYget_all_attributes( e ); // FIXME write this out, avoid using schema name for types. what happens with entities? same?
             LISTdo( attrs, attr, Variable ) {
-                printf( "     %s%s, from %s\n", ( attr->initializer ? "*" : " " ), attr->name->symbol.name, attr->type->superscope->symbol.name );
+                printf( "     %s%s, from %s, * %p\n", ( attr->initializer ? "*" : " " ), attr->name->symbol.name, attr->type->superscope->symbol.name, (void *) attr );
             } LISTod
         } else {
             printf( "\tnot found.\n" );
