@@ -1654,6 +1654,10 @@ void LIBstructor_print( Entity entity, FILE * file, Schema schema ) {
             } else { //derived attr is declared in the current entity
                 attr_entity = entity->symbol.name;
             }
+            //TODO differentiate between attr defined in current entity and attr redefined
+            // look for 'SELF\D.name'? where?
+            // it looks like two vars show up in attr_list - one 'name' for 'd', one 'name' for 'dd'
+            // is that correct?
             fprintf( file, "    MakeDerived( \"%s\", \"%s\" );\n",
                     VARget_simple_name( a ), attr_entity );
         }
