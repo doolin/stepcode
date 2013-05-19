@@ -1647,13 +1647,13 @@ void LIBstructor_print( Entity entity, FILE * file, Schema schema ) {
     attr_list = ENTITYget_all_attributes( entity );
 
     LISTdo( attr_list, a, Variable ) {
+        const char * attr_entity;
+        if( a->type->superscope ) {
+            attr_entity = a->type->superscope->symbol.name;
+        } else { //derived attr is defined in the current entity
+            attr_entity = entity->symbol.name;
+        }
         if( VARis_derived( a ) ) {
-            const char * attr_entity;
-            if( a->type->superscope ) {
-                attr_entity = a->type->superscope->symbol.name;
-            } else { //derived attr is declared in the current entity
-                attr_entity = entity->symbol.name;
-            }
             //TODO differentiate between attr defined in current entity and attr redefined
             // look for 'SELF\D.name'? where?
             // it looks like two vars show up in attr_list - one 'name' for 'd', one 'name' for 'dd'
@@ -1661,6 +1661,8 @@ void LIBstructor_print( Entity entity, FILE * file, Schema schema ) {
             fprintf( file, "    MakeDerived( \"%s\", \"%s\" );\n",
                     VARget_simple_name( a ), attr_entity );
         }
+        printf( "attr %s for %s - %s\n", VARget_simple_name( a ), entity->symbol.name, attr_entity );
+
     } LISTod;
     fprintf( file, "}\n" );
 

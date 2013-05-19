@@ -186,6 +186,9 @@ STEPattribute * SDAI_Application_instance::GetSTEPattribute( const char * nm, co
             ( entity ? ( 0 != a->aDesc->Owner().IsA( entity ) ) : true ) ) {
             break;
         }
+        if( 0 == strcmp( nm, a ->Name() ) && entity ) {
+            std::cout << "GetSTEPattribute -" << nm << "- IsA: " << a->aDesc->Owner().IsA( entity ) << " CanBe: " << a->aDesc->Owner().CanBe( entity ) << std::endl;
+        }
     }
 
     return a;
